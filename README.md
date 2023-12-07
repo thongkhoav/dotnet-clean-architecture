@@ -61,8 +61,20 @@
   - Add to Program.cs in .Api: app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 - ErrorHandlingFilterAttribute (catch exception and format response)
+
   - Define ErrorHandlingFilterAttribute in .Api
   - Add to Program.cs in .Api: builder.Services.AddControllers(options => options.Filters.Add<ErrorHandlingFilterAttribute>());
+
+- Return error in Service
+
+  - dotnet add .\BuberDinner.Application\ package oneof
+  - public record struct DuplicateEmailError(); in .Application
+  - change OneOf<AuthenticationResult, DuplicateEmailError> Register( in IAuthenticationService
+  - change AuthenticationService and AuthenticationController
+  - Other way: dotnet add .\BuberDinner.Application\ package fluentResults
+
+- Define error in .Domain
+  - dotnet add .\BuberDinner.Domain\ package ErrorOr
 
 ### Debugg .Net Attach
 
