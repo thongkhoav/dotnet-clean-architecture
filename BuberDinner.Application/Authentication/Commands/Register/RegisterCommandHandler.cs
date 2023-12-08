@@ -4,6 +4,7 @@ using BuberDinner.Application.Common.Errors;
 using BuberDinner.Domain.Entities;
 using ErrorOr;
 using MediatR;
+using BuberDinner.Application.Authentication.Common;
 
 namespace BuberDinner.Application.Authentication.Commands.Register;
 
