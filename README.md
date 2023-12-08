@@ -73,10 +73,18 @@
   - change AuthenticationService and AuthenticationController
   - Other way: dotnet add .\BuberDinner.Application\ package fluentResults
 
-- Define error in .Domain
+- Define error in .Domain layer
   - dotnet add .\BuberDinner.Domain\ package ErrorOr
+  - ErrorOr<AuthenticationResult> can result in AuthenticationResult or list<error>
+  - Define and custom Problem method in ApiController:ControllerBase
 
 ### Debugg .Net Attach
 
 - Ctrl Shift P ==> .Net: Generate Assets ...
 - To use ".Net Core Attach": run project first.
+
+### CQRS: Command(Manipulate data) && Query(Read data)
+
+- CommandService and QueryService
+- Controller call [Mediator], Mediator will điều phối(coordinate) to command or query service
+  - Add package: dotnet add .\BuberDinner.Application\ package MediatR

@@ -1,4 +1,3 @@
-
 using BuberDinner.Application.Common.Errors;
 using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistencek;
@@ -6,37 +5,17 @@ using BuberDinner.Domain.Entities;
 using ErrorOr;
 using FluentResults;
 
-namespace BuberDinner.Application.Authentication;
+namespace BuberDinner.Application.Authentication.Commands;
 
-public class AuthenticationService : IAuthenticationService
+public class AuthenticationCommandService : IAuthenticationCommandService
 {
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IUserRepository _userRepository;
 
-    public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+    public AuthenticationCommandService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
     {
         _jwtTokenGenerator = jwtTokenGenerator;
         _userRepository = userRepository;
-    }
-
-    public AuthenticationResult Login(string email, string password)
-    {
-        // User exist will continue
-        var user = _userRepository.GetUserByEmail(email);
-        if (user is null)
-        {
-            throw new Exception("User does not exist");
-        }
-
-        // Password is correct will continue
-        if (user.Password != password)
-        {
-            throw new Exception("Password is incorrect");
-        }
-
-        // Generate token
-        var token = _jwtTokenGenerator.GenerateToken(user);
-        return new AuthenticationResult(user, token);
     }
 
     public ErrorOr<AuthenticationResult> Register(string email, string password, string firstName, string lastName)

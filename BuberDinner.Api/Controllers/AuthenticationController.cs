@@ -3,36 +3,34 @@ namespace BuberDinner.Api.Controllers;
 
 using System.Net;
 using BuberDinner.Application.Authentication;
+using BuberDinner.Application.Authentication.Commands;
+using BuberDinner.Application.Authentication.Commands.Register;
+using BuberDinner.Application.Authentication.Queries;
 using BuberDinner.Application.Common.Errors;
 using BuberDinner.Contracts.Authentication;
 using ErrorOr;
 using FluentResults;
+using MediatR;
 
-[ApiController]
 [Route("auth")]
-public class AuthenticationController : ControllerBase
+public class AuthenticationController : ApiController
 {
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IMediator _mediator;
 
-    public AuthenticationController(IAuthenticationService authenticationService)
+    public AuthenticationController(IMediator mediator)
     {
-        _authenticationService = authenticationService;
+        _mediator = mediator;
     }
 
     [HttpPost("register")]
-    public IActionResult Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request)
     {
-        ErrorOr<AuthenticationResult> registerResult = _authenticationService.Register(
-            request.Email,
-            request.Password,
-            request.FirstName,
-            request.LastName);
-
-        return registerResult.MatchFirst<IActionResult>(
+        var command = new RegisterCommand(request.Email, request.Password, request.FirstName, request.LastName);
+        ErrorOr<AuthenticationResult> registerResult = await _mediator.Send(command);
+        return registerResult.Match(
             authResult => Ok(MapAuthResult(authResult)),
-            error => Problem(
-                statusCode: (int)StatusCodes.Status409Conflict,
-                title: error.Description
+            errors => Problem(
+                errors
             )
         );
         // if (registerResult.IsSuccess)
@@ -72,9 +70,23 @@ public class AuthenticationController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login(LoginRequest request)
     {
-        var authResult = _authenticationService.Login(request.Email, request.Password);
+        var loginResult = _authQueryService.Login(request.Email, request.Password);
         // authResult = { User user, String token}
-        var response = new AuthenticationResponse(authResult.User.Id, authResult.User.Email, authResult.Token, authResult.User.FirstName, authResult.User.LastName);
-        return Ok(response);
+        if (loginResult.IsError && loginResult.FirstError == Errors.Authentication.InvalidCredentials)
+        {
+            // Problem take args like this in ControllerBase
+            return Problem(
+                statusCode: StatusCodes.Status401Unauthorized,
+                title: loginResult.FirstError.Description
+            );
+        }
+
+        // Problem take in a list of errors in ApiController
+        return loginResult.Match(
+            authResult => Ok(MapAuthResult(authResult)),
+            errors => Problem(
+                errors
+            )
+        );
     }
 }
