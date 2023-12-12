@@ -1,5 +1,5 @@
 using System.Net;
-using BuberDinner.Api.Http;
+using BuberDinner.Api.Common.Http;
 using BuberDinner.Application.Common.Errors;
 using ErrorOr;
 using Microsoft.AspNetCore.Mvc;
